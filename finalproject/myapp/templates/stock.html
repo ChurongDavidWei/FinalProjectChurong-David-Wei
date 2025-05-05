@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Stock View{% endblock %}
+
+{% block content %}
+<div class="mt-4">
+    <h2>Stock Price Viewer</h2>
+    <form method="post" class="row g-3">
+        {% csrf_token %}
+        <div class="col-md-4">
+            <label for="ticker" class="form-label">Stock Ticker</label>
+            <input type="text" name="ticker" id="ticker" value="{{ ticker }}" class="form-control" required>
+        </div>
+
+        {% if available_dates %}
+        <div class="col-md-4">
+            <label for="selected_date" class="form-label">Select Date</label>
+            <select name="selected_date" id="selected_date" class="form-select">
+                {% for date in available_dates %}
+                <option value="{{ date }}" {% if date == selected_date %}selected{% endif %}>{{ date }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
+
+        <div class="col-md-4 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary">Get Hourly Data</button>
+        </div>
+    </form>
+
+    {% if error %}
+    <div class="alert alert-danger mt-3">{{ error }}</div>
+    {% endif %}
+
+    {% if plot_filename %}
+    <div class="mt-4">
+        <h4>{{ ticker }} - Hourly Prices on {{ selected_date }}</h4>
+        <img src="/static/charts/{{ plot_filename }}" alt="Stock Chart" class="img-fluid">
+    </div>
+    {% endif %}
+
+    {% if hourly_data %}
+    <div class="mt-4">
+        <h5>Hourly Data Table</h5>
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Time</th>
+                    <th>Closing Price (USD)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for time, price in hourly_data.items %}
+                <tr>
+                    <td>{{ time }}</td>
+                    <td>${{ price }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
